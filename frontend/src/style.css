@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-1: #090f1a;
+  --bg-2: #0d1524;
+  --ink-1: #d7e2f0;
+  --ink-2: #9bb1c9;
+}
+
+* , *::before, *::after { box-sizing: border-box; }
+
+html, body, #app {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  @apply font-sans;
+  color: var(--ink-1);
+  background:
+    radial-gradient(circle at 10% 15%, rgba(88, 166, 255, 0.08) 0, rgba(88, 166, 255, 0) 40%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed;
+  line-height: 1.52;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  @apply font-display;
+  letter-spacing: 0.01em;
+}

@@ -104,9 +104,4 @@ Typical hardening steps before enterprise production:
 - Add monitoring/observability and SLO alerts
 - Lock down admin cache endpoints
 
-## Why This Project Is Valuable for Portfolio
-- Demonstrates full-stack ownership.
-- Shows realtime systems understanding.
-- Uses clean backend layering and frontend state management.
-- Shows Dockerized development workflow.
-- Reflects practical industrial dashboard UI patterns.
+

@@ -40,9 +40,9 @@ npm run dev -- --host 0.0.0.0 --port 3000
 From host:
 ```bash
 python backend/populate.py --machines 20 --create-missing --mode api --api-base-url http://localhost:8003
+```
 
-
-## 5. Ports
+##  5. Ports
 - Frontend: `http://localhost:3000`
 - API (host): `http://localhost:8003`
 - API Docs: `http://localhost:8003/api/docs`

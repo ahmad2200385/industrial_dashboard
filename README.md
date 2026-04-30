@@ -1,5 +1,18 @@
 ﻿# Smart Factory Industrial Dashboard
 
+## ✨ Features  
+
+- 📊 Real-time data updates using WebSockets  
+- 🗄 Database migrations with Alembic  
+- ⚡ FastAPI-based scalable backend  
+- 🐳 Dockerized architecture  
+- ☁️ Cloud deployment on AWS  
+
+## 🌐 Live Demo  
+👉 http://15.134.203.129:3000  
+
+⚠️ Note: This link may not work as the instance was used for learning/testing and has been stopped to avoid unnecessary cloud charges.
+
 ## 1. Clone Project
 ```bash
 git clone https://github.com/ahmad2200385/industrial_dashboard.git

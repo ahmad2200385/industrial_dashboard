@@ -69,6 +69,23 @@ services:
       - backend_net
       - frontend_net
 
+  populate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    entrypoint: ["python", "populate.py"]
+    depends_on:
+      api:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-smart_factory}
+    command: ["--mode", "api", "--api-base-url", "http://api:8000", "--machines", "20", "--create-missing", "--duration", "0", "--interval", "2"]
+    networks:
+      - backend_net
+
   frontend:
     build:
       context: ./frontend

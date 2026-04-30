@@ -1,107 +1,169 @@
-# Smart Factory System - Project Details
+# Smart Factory Industrial Dashboard - Project Details
 
-## What This Project Is
-Smart Factory System is a full-stack industrial monitoring dashboard that simulates and visualizes real-time machine telemetry.
+## Overview
+This project is a full-stack industrial monitoring dashboard for smart factory operations.  
+It simulates machine telemetry and visualizes line health, machine status, alerts, and trends in real time.
 
-It is designed as an Industry 4.0 style project for learning, portfolio, and demonstration purposes.
-
-## What It Does
-- Monitors machines, sensor readings, and alerts in near real time.
-- Streams live updates from backend to frontend using WebSockets.
-- Shows operational views for:
+## Current Functional Scope
+- Real-time machine monitoring with WebSocket updates
+- Multi-view operations dashboard:
   - `Overview`
   - `Lines`
   - `Machines`
   - `Alerts`
   - `Analytics`
   - `Maintenance`
-- Supports alert lifecycle (active, resolved, expired).
-- Caches recent operational data in Redis.
-- Runs fully with Docker Compose or natively without Docker.
-- Auto-populates demo telemetry data after startup scripts complete.
+- Alert lifecycle handling (active, acknowledged/resolved, expired)
+- Redis-assisted caching for fast operational reads
+- CSV/PDF export actions from frontend
+- Docker-first workflow with auto telemetry generation
 
-## Tech Stack
+## Technology Stack
 - Backend: FastAPI, SQLAlchemy, Alembic, Redis
-- Frontend: Vue 3 (Composition API), Vite, Tailwind setup + custom dashboard styling
+- Frontend: Vue 3 (Composition API), Vite
 - Database: PostgreSQL
-- Realtime: WebSocket + Redis Pub/Sub fanout
-- Deployment/Dev Ops: Docker, Docker Compose
+- Realtime: WebSocket + Redis pub/sub
+- DevOps: Docker + Docker Compose
 
-## Architecture Overview
-- `backend/`
-  - `api/routers`: REST + WebSocket routes
-  - `services/`: business logic layer
-  - `db/repositories`: data access layer
-  - `models/`: SQLAlchemy models
-  - `schemas/`: request/response validation models
-  - `core/`: config, middleware, logging
-  - `alembic/`: DB migrations
-- `frontend/`
-  - `src/App.vue`: main dashboard UI
-  - `src/composables/useFactoryDashboard.js`: state/computed/actions
-  - `src/services/api.js`: API client
-  - `src/services/websocket.js`: WebSocket client/reconnect handling
+## Runtime Services (Docker Compose)
+- `postgres`: primary relational store
+- `redis`: cache + pub/sub
+- `api`: FastAPI app, migrations on startup, serves REST + WebSocket
+- `populate`: telemetry simulator (`populate.py`) running continuously in API mode
+- `frontend`: production-built Vue app served via Nginx
 
-## Core Features
-- Machine CRUD operations
-- Sensor data ingestion and listing
-- Alert generation from telemetry thresholds
-- Alert resolve/expire workflows
-- Redis cache endpoints for machine snapshots/history
-- CSV export and print-friendly report flow
+## Backend Architecture
+- `backend/api/routers`: route handlers (`machines`, `sensor_data`, `alerts`, `websocket`, etc.)
+- `backend/services`: business logic (alerts, sensor processing, redis/websocket integration)
+- `backend/db/repositories`: data access abstraction
+- `backend/models`: SQLAlchemy models
+- `backend/schemas`: Pydantic schemas for API contracts
+- `backend/core`: config, middleware, logging
+- `backend/alembic`: schema migration history
+- `backend/populate.py`: synthetic telemetry generator
 
-## Realtime Data Flow
-1. Telemetry is posted to backend (`/sensor-data`).
-2. Backend stores in PostgreSQL.
-3. Alert rules run and create alerts if needed.
-4. Events are published to Redis and broadcast over WebSocket.
-5. Frontend updates dashboard state instantly.
+## Frontend Architecture
+- `frontend/src/App.vue`: main SCADA-style dashboard shell and modules
+- `frontend/src/composables/useFactoryDashboard.js`: central dashboard state and derived metrics
+- `frontend/src/services/api.js`: HTTP client integration
+- `frontend/src/services/websocket.js`: live subscription and reconnect behavior
 
-## Running the Project
+## Data/Alert Flow
+1. `populate` posts telemetry to `api` (`/sensor-data`) using `http://api:8000`.
+2. API validates and stores records in PostgreSQL.
+3. Alert logic evaluates thresholds and updates alert records.
+4. Events are published and streamed via WebSocket.
+5. Frontend updates tables/charts/status in near real time.
 
-### One-Command Start (Recommended)
-Run from project root:
+## UI Notes (Current)
+- Line and machine views are both active operational views.
+- Table alignment has been tuned so headers and values are visually consistent.
+- Filtering/sorting controls drive the same machine/line dataset.
 
-- Linux/macOS (Docker mode): `./start.sh`
-- Windows PowerShell (Docker mode): `.\start.ps1`
-- Linux/macOS (Local mode): `./start.sh local`
-- Windows PowerShell (Local mode): `.\start.ps1 local`
+## Run Modes
+- Docker mode: recommended and complete (includes auto-populate).
+- Local mode: available for backend/frontend development with local PostgreSQL + Redis.
 
-Both scripts auto-start services, wait for API readiness, and run telemetry seeding automatically.
+## Run Without Docker (Manual Setup)
 
-### Run Using Docker
-1. Start:
-   - `./start.sh` (Linux/macOS) or `.\start.ps1` (Windows)
-2. Open:
-   - Frontend: `http://localhost:3000`
-   - API: `http://localhost:8003`
-3. Stop:
-   - `docker compose down`
+### 1) Install prerequisites
+- Python 3.11+
+- Node.js 18+
+- PostgreSQL 14+ (or compatible)
+- Redis 6+ (or compatible)
 
-### Run Locally (Without Docker)
-1. Make sure PostgreSQL and Redis are already running.
-2. Start:
-   - `./start.sh local` (Linux/macOS) or `.\start.ps1 local` (Windows)
-3. Open:
-   - Frontend: `http://localhost:3000`
-   - API: `http://localhost:8003`
+### 2) Setup PostgreSQL
+Create database and user (example):
 
-## Telemetry Simulation
-Startup scripts already run telemetry population automatically.
-Use simulator commands below only for manual reseeding or extra data generation:
-
-```bash
-docker compose exec api python populate.py --machines 20 --create-missing --mode api --api-base-url http://127.0.0.1:8000
+```sql
+CREATE DATABASE smart_factory;
+CREATE USER postgres WITH PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE smart_factory TO postgres;
 ```
 
-## Production Readiness Notes
-This project is production-inspired and structured with proper layers, but still portfolio-focused.
+Default local connection example:
+- Host: `localhost`
+- Port: `5432`
+- DB: `smart_factory`
+- User: `postgres`
+- Password: `postgres`
 
-Typical hardening steps before enterprise production:
-- Add authentication/authorization
-- Add stricter rate limits and security policies
-- Add full test suite + CI checks
-- Add monitoring/observability and SLO alerts
-- Lock down admin cache endpoints
+### 3) Setup Redis
+Start Redis locally:
+- Linux/macOS (service): `redis-server`
+- Windows (Redis service/container): ensure it is reachable
 
+Default Redis local values:
+- Host: `localhost`
+- Port: `6379`
+- DB index: `0`
+
+### 4) Configure backend environment
+Create/update `backend/.env`:
+
+```env
+APP_ENV=development
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/smart_factory
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+AUTO_CREATE_SCHEMA=false
+```
+
+### 5) Run backend manually
+```bash
+cd backend
+pip install -r requirements.txt
+alembic upgrade head
+uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+```
+
+### 6) Run frontend manually
+```bash
+cd frontend
+npm install
+npm run dev -- --host 0.0.0.0 --port 3000
+```
+
+### 7) Optional manual telemetry simulation
+```bash
+python backend/populate.py --machines 20 --create-missing --mode api --api-base-url http://localhost:8003
+```
+
+## Manual Mode Troubleshooting
+
+### PostgreSQL errors
+- `password authentication failed`: verify username/password in `DATABASE_URL`.
+- `connection refused`: PostgreSQL service not running or wrong port.
+- `database "smart_factory" does not exist`: create DB first.
+
+Quick check:
+```bash
+psql -h localhost -p 5432 -U postgres -d smart_factory
+```
+
+### Redis errors
+- `Error 10061` / `connection refused`: Redis not running or wrong port.
+- Wrong host in env: ensure `REDIS_HOST=localhost` for local mode.
+
+Quick check:
+```bash
+redis-cli -h localhost -p 6379 ping
+```
+Expected response: `PONG`
+
+### Backend migration/startup issues
+- If `alembic upgrade head` fails, verify `DATABASE_URL` and DB permissions.
+- If backend starts but dashboard is empty, run simulator command above.
+
+### Frontend startup issues
+- `vite is not recognized`: run `npm install` inside `frontend` first.
+- Port conflict on `3000`: run with another port, for example:
+```bash
+npm run dev -- --host 0.0.0.0 --port 3001
+```
+
+### API URL confusion in manual mode
+- Manual backend runs on `http://localhost:8003`
+- Use this URL for simulator and frontend API config in local development
 
